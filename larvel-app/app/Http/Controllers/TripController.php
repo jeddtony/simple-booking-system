@@ -49,7 +49,7 @@ class TripController extends Controller
         $validator = Validator::make($request->all(), [
             'start_location_id' => 'required',
             'end_location_id' => 'required',
-            // 'vehicle_id' => 'required',
+            'amount' => 'required',
             'start_time' => 'required'
         ]);
         
@@ -60,7 +60,7 @@ class TripController extends Controller
         $tripData = [
             'start_location_id' => $request->start_location_id,
             'end_location_id' => $request->end_location_id,
-            // 'vehicle_id' => $request->vehicle_id,
+            'amount' => $request->amount,
             'start_time' => $request->start_time
         ];
 

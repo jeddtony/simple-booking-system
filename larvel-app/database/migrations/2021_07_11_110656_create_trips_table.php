@@ -19,6 +19,7 @@ class CreateTripsTable extends Migration
             $table->foreignId('end_location_id');
             // $table->foreignId('vehicle_id');
             $table->dateTime('start_time');
+            $table->integer('amount');
             $table->timestamps();
         });
     }

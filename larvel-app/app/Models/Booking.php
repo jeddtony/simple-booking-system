@@ -28,6 +28,6 @@ class Booking extends Model
     }
 
     public function seat() {
-        return $this->hasOne('App\Models\Seat');
+        return $this->hasOne('App\Models\Seat', 'id', 'seat_id');
     }
 }

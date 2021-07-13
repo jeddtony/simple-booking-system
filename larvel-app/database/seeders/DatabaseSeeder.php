@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
 
-        $states = array('Abia', 'Adamawa', 'Akwa Ibom');
+        $states = array('Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi');
 
         $createRecord = function ($state){
            $tate = State::create([

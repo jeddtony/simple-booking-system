@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {ButtonLink, Drawer, PageTitle} from '../../units';
+import {ButtonLink, Drawer, NumberFormat, PageTitle} from '../../units';
 import {useTrips} from '../../hooks';
 import { ReactQueryDevtools } from 'react-query-devtools';
 import {Card, Row, Col} from 'antd';
@@ -28,13 +28,11 @@ export default function ViewTrips() {
         accessor: 'end_location.name'
     }, 
     {
-        Header: 'Action',
-        accessor: 'id',
-        Cell: d => (
-            <ButtonLink to={"/users/"+d.value} label="View" size="small" type="primary" />
-        ),
-        filterable: false
+        Header: 'Amount',
+        accessor: 'amount',
+        Cell: d => <NumberFormat value={d.value} />
     },
+   
     
 ],actualData )
 

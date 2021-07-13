@@ -1,21 +1,29 @@
-import React, {useMemo} from 'react';
-import {ButtonLink, Drawer, PageTitle} from '../../units';
+import React, {useMemo, useState} from 'react';
+import {ButtonLink, Drawer, PageTitle, Modal, NumberFormat} from '../../units';
 import {useBooking} from '../../hooks';
 import { ReactQueryDevtools } from 'react-query-devtools';
-import {Card, Row, Col} from 'antd';
+import {Card, Row, Col, Button, Typography} from 'antd';
 import {ReactTable} from '../../units';
 import {formatDate, formatDateAndTime} from '../../helpers';
 
+const {Text} = Typography;
 
 export default function ViewTrips() {
     const { status, data, error, isFetching } = useBooking();
     
     const actualData = data? data.data : [];
+
+    const [showModal, setShowModal] = useState(false);
+    const [selectedData, setSelectedData] = useState({});
     
+    const handleButtonClick = (booking) =>{
+        setSelectedData(booking);
+        setShowModal(true);
+    }
     const columns = useMemo(() => [
         {
             id: 'date',
-            Header: 'Date Added',
+            Header: 'Date booked',
             accessor: d=> formatDate(d.created_at),
             Cell: d => <span>{d.value}</span>
     }, 
@@ -25,7 +33,7 @@ export default function ViewTrips() {
     },
     {
         Header: 'Pickup location',
-        accessor: 'end_location.name'
+        accessor: 'start_location.name'
     }, 
     {
         Header: 'Destination',
@@ -46,10 +54,13 @@ export default function ViewTrips() {
        
     },
     {
+        id: 'action',
         Header: 'Action',
-        accessor: 'id',
+        accessor: d => d,
         Cell: d => (
-            <ButtonLink to={"/users/"+d.value} label="View" size="small" type="primary" />
+            <Button type="primary" size="small" onClick={() => handleButtonClick(d.value)}>
+                View
+            </Button>
         ),
         filterable: false
     },
@@ -59,6 +70,13 @@ export default function ViewTrips() {
     return (
         <>
           <Drawer selectedKey="02">
+              <Modal 
+              title="Booking Details"
+              visible={showModal} 
+              onCancel={setShowModal}
+              hideFooter={true}>
+                  <ViewDetails booking={selectedData} />
+              </Modal>
             <Card>
                 <Row gutter={24}>
                     <Col span={20}>
@@ -81,3 +99,30 @@ export default function ViewTrips() {
         </>
     )
 }
+
+const ViewDetails =({booking}) => {
+    return (
+        <Row>
+            <LabelAndNames label="Date booked" value={formatDate(booking.created_at)}  backgroundColor = "#EBEBEB" />
+            <LabelAndNames label="Customer" value={booking.customer_name}  backgroundColor = "#FFF" />
+            <LabelAndNames label="Pickup location" value={booking.start_location.name}  backgroundColor = "#EBEBEB" />
+            <LabelAndNames label="Destination" value={booking.end_location.name}  backgroundColor = "#FFF" />
+            <LabelAndNames label="Amount" value={<NumberFormat value={booking.amount} />}  backgroundColor = "#EBEBEB" />
+            <LabelAndNames label="Vehicle" value={booking.vehicle.name}  backgroundColor = "#FFF" />
+            <LabelAndNames label="Seat" value={booking.seat.name}  backgroundColor = "#EBEBEB" />
+        </Row>
+    )
+}
+
+
+export const LabelAndNames = ({ label, value, backgroundColor }) => {
+    return (
+      <Col span="24" style={{ backgroundColor }}>
+        <Text>{label}: </Text>
+        <span style={{float: "right"}}>
+        <Text strong> {value}</Text>
+        </span>
+      </Col>
+      
+    );
+  };

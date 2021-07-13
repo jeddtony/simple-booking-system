@@ -16,7 +16,8 @@ class SeatController extends Controller
     public function index($vehicleId)
     {
         //
-        $seats = Seat::where('vehicle_id', $vehicleId)->get();
+        $seats = Seat::where('vehicle_id', $vehicleId)
+        ->where('status', true)->get();
         return $this->formatSuccessResponse('Lists of seats', $seats);
     }
 

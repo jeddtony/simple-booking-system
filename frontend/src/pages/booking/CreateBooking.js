@@ -1,18 +1,26 @@
 import React, {useState} from 'react';
-import {ButtonLink, Drawer, PageTitle} from '../../units';
-import {Card, Form, Input, Button, Row, Col, DatePicker } from 'antd';
+import {ButtonLink, Drawer, NumberFormat, PageTitle} from '../../units';
+import {Card, Form, Input, Button, Row, Col, DatePicker, Select as AntdSelect, Modal as ConfirmModal } from 'antd';
 import {FormGroup, Select} from '../../units';
 import {useApi, usePageValue} from '../../context';
 import Swal from "sweetalert2";
 import {useLocations, useVehicles, useSeats, 
         useTripByDate} from '../../hooks';
 import moment from 'moment';
+import {Redirect} from 'react-router-dom';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+
+const {Option} = AntdSelect;
+
+const {confirm} = ConfirmModal;
 
 export default function CreateLocation() {
 
 
     const [deptDate, setDeptDate] = useState(moment().format('YYYY-MM-DD'));
     const [selectedVehicle, setSelectedVehicle] = useState();
+    const [redirect, setRedirect] = useState(false);
+    const [selectedTripAmount, setSelectedTripAmount] = useState()
     const { status, data, error, isFetching } = useTripByDate(deptDate);
 
 
@@ -27,14 +35,41 @@ export default function CreateLocation() {
     const [form] = Form.useForm();
     let api = useApi();
 
+    const handleTripChange = (value) => {
+        
+       stateData.map(stat => {
+            if(stat.id == value){
+                console.log(stat.amount)
+                setSelectedTripAmount(stat.amount)
+            }
+        }
+            );
+    }
     
     const onFinish = values => {
         let formData = {
-            customer_name: values.start_location,
-            trip_id: values.end_location,
+            customer_name: values.customer_name,
+            trip_id: values.trip_id,
             vehicle_id: values.vehicle,
+            seat_id: values.seat_id,
             start_time: moment(values.dept_time).format('YYYY-MM-DD HH:mm:ss')
         }
+
+
+        function showConfirm() {
+            confirm({
+              title: 'Make payment?',
+              icon: <ExclamationCircleOutlined />,
+              content: (<span>You are about to pay {<NumberFormat value={selectedTripAmount} />} </span>),
+              onOk() {
+               postForm();
+              },
+              onCancel() {
+                console.log('Cancel');
+              },
+            });
+          }
+
 
         const postForm = async() => {
             setIsLoading(true);
@@ -49,7 +84,7 @@ export default function CreateLocation() {
                     icon: "success",
                   }).then((value) => {
                     form.resetFields();
-                    // setRedirect(true);
+                    setRedirect(true);
                   });
                 } else {
                   Swal.fire({
@@ -62,7 +97,7 @@ export default function CreateLocation() {
                 }
         }
 
-        postForm()
+        showConfirm()
     }
 
     const formItemLayout = {
@@ -77,7 +112,7 @@ export default function CreateLocation() {
     return (
         <Drawer>
             <Card>
-
+        {redirect && <Redirect to="/booking" />}
             <PageTitle title="Book a seat" />
 
             <Form
@@ -100,12 +135,28 @@ export default function CreateLocation() {
     />
         </FormGroup>
 
-          <FormGroup label="Pick up location" required={true} name="start_location"
+          <FormGroup label="Select trip" required={true} name="trip_id"
         //   onChange={(e) => setStartLocation(e.target.value)}
           > 
-          <Select>
-                {stateData}
-          </Select>
+         <AntdSelect 
+        
+        showSearch
+        onChange={e => handleTripChange(e)}
+        optionFilterProp="children"
+    filterOption={(input, option) =>
+      option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    }
+    filterSort={(optionA, optionB) =>
+      optionA.children.toLowerCase().localeCompare(optionB.children.toLowerCase())
+    }
+        >
+            {
+                stateData && 
+                stateData.map (child => (
+                    <Option value={child.id}>{child.start_location.name + ' to ' + child.end_location.name}</Option>
+                ))
+            }
+        </AntdSelect> 
         </FormGroup>
 
         <FormGroup label="Customer Name" required={true} name="customer_name"> 
@@ -120,7 +171,7 @@ export default function CreateLocation() {
           </Select>
         </FormGroup>
 
-        <FormGroup label="Available Seats" required={true} name="vehicle"> 
+        <FormGroup label="Available Seats" required={true} name="seat_id"> 
           <Select>
                 {seatData}
           </Select>
@@ -131,7 +182,7 @@ export default function CreateLocation() {
             <Col span="16">
             <Button type="primary" htmlType="submit" loading={isLoading}
             disabled={isLoading}>
-          Create Trip
+          Make Payment
         </Button>
             </Col>
         </Row>

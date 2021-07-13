@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Seat;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -24,12 +25,12 @@ class BookingController extends Controller
         if($date){
             $booking = Booking::whereDate('start_time', $date)
             ->with('vehicle')->with('startLocation')->with('endLocation')
-            ->with('trip')->get();
+            ->with('trip')->with('seat')->get();
             return $this->formatSuccessResponse('Booking', $booking);
         }
         // $booking = Booking::with('startLocation')->with('endLocation')->get();
         $booking = Booking::with('vehicle')->with('startLocation')->with('endLocation')
-            ->with('trip')->get();
+            ->with('trip')->with('seat')->get();
         return $this->formatSuccessResponse('Booking', $booking);
 
     }
@@ -66,8 +67,9 @@ class BookingController extends Controller
             return $this->formatInputErrorResponse($validator->errors());
         }
 
-        $trip = Trip::find($request->trip_id)->first();
+        $trip = Trip::where('id',$request->trip_id)->first();
         
+        // dd($trip);
         if(!$trip){
             return $this->notFoundResponse('The selected trip does not exist');
         }
@@ -83,6 +85,12 @@ class BookingController extends Controller
         ];
 
         $booking = Booking::create($bookingData);
+
+        // update seat availability
+        $seat = Seat::find($request->seat_id);
+        $seat->status = false;
+        $seat->save();
+
         return $this->formatCreatedResponse('Booking successful', $booking);
 
     }

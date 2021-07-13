@@ -30,6 +30,7 @@ export default function CreateLocation() {
             start_location_id: values.start_location,
             end_location_id: values.end_location,
             vehicle_id: values.vehicle,
+            amount: values.amount,
             start_time: moment(values.dept_time).format('YYYY-MM-DD HH:mm:ss')
         }
 
@@ -104,11 +105,9 @@ export default function CreateLocation() {
           </Select>
         </FormGroup>
 
-        {/* <FormGroup label="Vehicle" required={true} name="vehicle"> 
-          <Select>
-                {vehicleData}
-          </Select>
-        </FormGroup> */}
+        <FormGroup label="Cost of trip" required={true} name="amount"> 
+          <Input type="number" placeholder="10000"/>
+        </FormGroup>
 
         <FormGroup label="Departure time" required={true} name="dept_time"> 
         <DatePicker
